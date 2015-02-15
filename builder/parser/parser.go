@@ -3,6 +3,7 @@ package parser
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -133,8 +134,21 @@ func Parse(rwc io.Reader) (*Node, error) {
 		}
 
 		if child != nil {
+			if len(root.Children) > 0 {
+				previousCmd := root.Children[len(root.Children)-1]
+				if child.Value == "&&" && previousCmd.Value == "run" {
+					fmt.Println(child.Next)
+					fmt.Println(root.Children[len(root.Children)-1])
+					previousCmd.Next.Value = previousCmd.Next.Value + " && " + child.Next.Value
+					child = nil
+				}
+			}
+		}
+
+		if child != nil {
 			root.Children = append(root.Children, child)
 		}
+
 	}
 
 	return root, nil
